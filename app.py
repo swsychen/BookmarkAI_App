@@ -64,6 +64,8 @@ openai_api_key=OPENAI_API_KEY
 if "messages" not in st.session_state:
     st.session_state["messages"] = [ChatMessage(role="assistant", content="How can I help you?")]
 
+# The function of this loop is to preserve the chat history and show them always
+# each `st.session_state.messages.append` will add a new message to the chat history
 for msg in st.session_state.messages:
     st.chat_message(msg.role).write(msg.content)
 
