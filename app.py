@@ -26,7 +26,9 @@ namespace = ""  # Replace with your namespace name, empty for free tier
 
 
 def configure_retriever(model_name,openai_api_key,pinecone_api_key,namespace,index_name,text_field,stream_handler):
-    
+    """ 
+    Here we define the retriever chain with the OpenAI model and Pinecone vector store. 
+    """
     embed = OpenAIEmbeddings(model=model_name, openai_api_key=openai_api_key)
     vectorstore= PineconeVectorStore(
             pinecone_api_key=pinecone_api_key,namespace=namespace,index_name=index_name,embedding=embed,text_key=text_field
@@ -39,6 +41,9 @@ def configure_retriever(model_name,openai_api_key,pinecone_api_key,namespace,ind
 
 
 class StreamHandler(BaseCallbackHandler):
+    """ 
+    Here is the stream handler that will be used to stream the output of the model to the UI word by word. 
+    """
     def __init__(self, container, initial_text=""):
         self.container = container
         self.text = initial_text
@@ -51,6 +56,10 @@ class StreamHandler(BaseCallbackHandler):
 # with st.sidebar:
 #     openai_api_key = st.text_input("OpenAI API Key", type="password")
 openai_api_key=OPENAI_API_KEY
+
+# The majority of the code below is for the Streamlit UI
+# We get the user prompt from the chat and input it to the retriever chain
+# The model response from the chain is then streamed to the UI.
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [ChatMessage(role="assistant", content="How can I help you?")]
@@ -71,5 +80,4 @@ if prompt := st.chat_input():
         
         qa=configure_retriever(model_name,openai_api_key,PINECONE_API_KEY,namespace,index_name,text_field,stream_handler)
         response = qa.invoke(prompt)
-        # print(response)
         st.session_state.messages.append(ChatMessage(role="assistant", content=response['result']))
